@@ -1,6 +1,6 @@
 ---
 title: KEMTLS
-abbrev: KEMTLD
+abbrev: KEMTLS
 docname: draft-wiggers-tls-kemtls-latest
 date:
 category: info
@@ -11,18 +11,19 @@ keyword: Internet-Draft
 stand_alone: yes
 pi: [toc, sortrefs, symrefs]
 
-author:
+author: &authors
  -  ins: T. Wiggers
     name: Thom Wiggers
+    org: "Radboud University, Institute of Computing and Information Sciences, Nijmegen, The Netherlands"
+    abbrev: "Radboud University"
+    email: thom@thomwiggers.nl
 
 normative:
   KEMTLS:
-    title: "Recommendation for Block Cipher Modes of Operation: Galois/Counter Mode (GCM) and GMAC"
-    date: 2007-11
+    title: "Authenticating with KEMs in TLS"
+    date: 2020-11
     author:
-      - ins: M. Dworkin
-    seriesinfo:
-      NIST: Special Publication 800-38D
+      <<: *authors
 
 --- abstract
 
