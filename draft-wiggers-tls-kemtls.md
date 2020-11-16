@@ -21,7 +21,7 @@ author: &authors
     email: thom@thomwiggers.nl
 
 normative:
-  RFC8664:
+  RFC8446:
 
 informative:
   KEMTLS:
