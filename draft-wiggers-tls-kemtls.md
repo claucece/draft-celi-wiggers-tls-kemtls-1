@@ -34,7 +34,7 @@ informative:
         org: University of Waterloo
       - ins: P. Schwabe
         name: Peter Schwabe
-        org: "Radboud University"
+        org: "Radboud University and Max Planck Institute for Security and Privacy"
       - ins: T. Wiggers
         name: Thom Wiggers
         org: "Radboud University"
