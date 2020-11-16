@@ -61,11 +61,34 @@ TODO
 
 # Negotiation
 
-TODO
+1. Add KEMs to ``supported_groups`` and KEM public key to ``key_shares``.
+1. Add ``KEMTLSwithSomeKEM`` to ``signature_algorithms``.
+  1. Alternatively, use DC draft and add it to ``signature_algorithms_dc``.
+1. Server replies with KEM ciphertext encapsulated to KEM public key (or HRR).
+1. Server replies with CA-signed KEM public-key X.509 certificate.
+  1. Alternatively, use DC draft and reply with KEM delegated credential.
+1. Server MUST NOT submit ``CertificateVerify`` message.
+1. Client detects that KEMTLS is being used via the "signature algorithm", ie. the type of credential provided by the server.
+1. Client encapsulates ciphertext to server and transmits it as ``ClientKEMCiphertext`` (or piggy-back on ``ClientKeyExchange``?).
+1. Client submits ``ClientFinished``.
+1. Client completed handshake.
+1. Server submits ``ServerFinished``.
+1. Server completes handshake.
+
+# Key schedule
+
 
 # Protocol Mechanics
 
 TODO
+
+# (Middlebox) Compatibility Considerations
+
+Like in TLS 1.3, after the ephemeral key is derived a ``ChangeCipherSpec`` message is sent and the messages afterwards are encrypted.
+This will make the following messages opaque to non-decrypting middleboxes.
+The ``ClientHello`` and ``ServerHello`` messages are still in the clear and these require the addition of new ``key_share`` types.
+Typical KEM public-key and ciphertext sizes are also significantly bigger than pre-quantum (EC)DH keyshares.
+This may still cause problems.
 
 # Security Considerations {#sec-considerations}
 
