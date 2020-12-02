@@ -114,6 +114,7 @@ TODO
 
 Like in TLS 1.3, after the ephemeral key is derived a ``ChangeCipherSpec`` message is sent and the messages afterwards are encrypted.
 This will make the following messages opaque to non-decrypting middleboxes.
+
 The ``ClientHello`` and ``ServerHello`` messages are still in the clear and these require the addition of new ``key_share`` types.
 Typical KEM public-key and ciphertext sizes are also significantly bigger than pre-quantum (EC)DH keyshares.
 This may still cause problems.
