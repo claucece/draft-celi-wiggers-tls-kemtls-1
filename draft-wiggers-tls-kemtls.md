@@ -78,25 +78,54 @@ TODO
 
 # Key schedule
 
-## Handshake secret
+## Handshake Secret
 
-The Handshake secret is derived from the ephemeral key exchange shared secret.
+The Handshake secret ``HS`` is derived from the ephemeral key exchange shared secret.
 
-## authenticated handshake secret
+    ...
+                         v
+    ephemeral_kem_shared -> HKDF-Extract = Handshake Secret
+                         v
+    ...
+
+## Authenticated Handshake Secret
 
 After deriving ``HS``, the Handshake Secret, from the ephemeral keys, we need an additional handshake secret in KEMTLS.
 We require this additional handshake secret as we need an (implicitly) authenticated handshake secret to encrypt any client credentials under.
 Otherwise we do not have confidentiality for the client certificate.
 
-``AHS`` is derived from ``dHS`` through ``HKDF.Extract(dHS, shared_secret_static_kem)``.
+``AHS`` is derived from the hanshake secret and the static shared key.
+We change the derivation of the main secret accordingly.
 
-``dAHS`` is derived from ``AHS`` through ``HKDF.Expand(AHS, "derived", 0)``
+                      Handshake Secret
+                         |
+                         v
+                        Derive-Secret(., "derived", "")
+                         |
+                         v
+    static_server_shared -> HKDF.Extract = Authenticated Handshake Secret
+                         |
+                         +-----> Derive-Secret(., "c ahs traffic",
+                         |                     ClientHello...ClientKemCiphertext)
+                         |                     = client_authenticated_handshake_traffic_secret
+                         |
+                         +-----> Derive-Secret(., "s ahs traffic",
+                         |                     ClientHello...ClientKemCiphertext)
+                         |                     = server_authenticated_handshake_traffic_secret
+                         |
+                         v
+                        Derive-Secret(., "derived", "")
+                         |
+                         v
+    static_client_shared -> HKDF.Extract = Main Secret
+                         v
 
-We change the derivation of the master secret accordingly.
 
-``MS`` is derived from ``dAHS`` through ``HKDF.Extract(dAHS, shared_secret_static_client_kem)``.
 ``shared_secret_static_client_kem`` is the shared secret encapsulated to the client's public key.
 If there is no client authentication, it's simply replaced by ``0``.
+
+                         v
+                       0 -> HKDF.Extract = Main Secret
 
 ## Finished keys
 
