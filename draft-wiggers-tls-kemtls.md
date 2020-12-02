@@ -78,6 +78,33 @@ TODO
 
 # Key schedule
 
+## Handshake secret
+
+The Handshake secret is derived from the ephemeral key exchange shared secret.
+
+## authenticated handshake secret
+
+After deriving ``HS``, the Handshake Secret, from the ephemeral keys, we need an additional handshake secret in KEMTLS.
+We require this additional handshake secret as we need an (implicitly) authenticated handshake secret to encrypt any client credentials under.
+Otherwise we do not have confidentiality for the client certificate.
+
+``AHS`` is derived from ``dHS`` through ``HKDF.Extract(dHS, shared_secret_static_kem)``.
+
+``dAHS`` is derived from ``AHS`` through ``HKDF.Expand(AHS, "derived", 0)``
+
+We change the derivation of the master secret accordingly.
+
+``MS`` is derived from ``dAHS`` through ``HKDF.Extract(dAHS, shared_secret_static_client_kem)``.
+``shared_secret_static_client_kem`` is the shared secret encapsulated to the client's public key.
+If there is no client authentication, it's simply replaced by ``0``.
+
+## Finished keys
+
+We derived the finished keys from ``MS`` instead of from ``CHTS`` and ``SHTS``.
+We separate them by individual labels and the transcript.
+
+``finished_client <- HKDF.Expand(MS, "c finished", transcript_up_to_CF)``
+``finished_server <- HKDF.Expand(MS, "s finished", transcript_up_to_SF)``
 
 # Protocol Mechanics
 
@@ -97,7 +124,7 @@ TODO
 
 # IANA Considerations
 
-TODO
+* We need a new OID for each KEM to encode them in X.509 certificates.
 
 # Acknowledgements
 
