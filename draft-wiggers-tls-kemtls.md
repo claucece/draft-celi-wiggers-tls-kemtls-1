@@ -76,6 +76,9 @@ TODO
 1. Server submits ``ServerFinished``.
 1. Server completes handshake.
 
+
+TODO probably split off DC into separate paragraph.
+
 # Key schedule
 
 ## Handshake Secret
