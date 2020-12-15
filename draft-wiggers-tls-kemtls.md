@@ -129,14 +129,15 @@ If there is no client authentication, it's simply replaced by ``0``.
 
                          v
                        0 -> HKDF.Extract = Main Secret
+                         v
 
 ## Finished keys
 
 We derived the finished keys from ``MS`` instead of from ``CHTS`` and ``SHTS``.
 We separate them by individual labels and the transcript.
 
-``finished_client <- HKDF.Expand(MS, "c finished", transcript_up_to_CF)``
-``finished_server <- HKDF.Expand(MS, "s finished", transcript_up_to_SF)``
+    finished_client <- HKDF.Expand(MS, "c finished", transcript_up_to_CF)
+    finished_server <- HKDF.Expand(MS, "s finished", transcript_up_to_SF)
 
 # Protocol Mechanics
 
