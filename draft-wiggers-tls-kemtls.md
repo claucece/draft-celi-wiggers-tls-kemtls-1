@@ -357,7 +357,11 @@ than pre-quantum (EC)DH keyshares. This may still cause problems.
 
 # Security Considerations {#sec-considerations}
 
-TODO
+TODO:
+
+* sending data to an implicitly authenticated and not-full downgrade
+resilient peer
+* address CA and pq keys
 
 # IANA Considerations
 
