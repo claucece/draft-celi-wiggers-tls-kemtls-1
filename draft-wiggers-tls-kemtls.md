@@ -115,7 +115,7 @@ modes:
 
 Key  ^ ClientHello
 Exch | + kem_key_share*
-     |  + key_share*
+     | + key_share*
      | + kem_signature_algorithms*
      v + signatuere_algorithms*     -------->
                                                       ServerHello  ^ Key
