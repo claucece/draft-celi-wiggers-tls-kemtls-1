@@ -366,6 +366,8 @@ TODO:
 * sending data to an implicitly authenticated and not-full downgrade
 resilient peer
 * address CA and pq keys
+* consider implicit vs explicit authentication
+* consider downgrade resilience
 
 # IANA Considerations
 
