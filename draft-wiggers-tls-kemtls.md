@@ -50,6 +50,8 @@ TODO
 
 # Introduction
 
+DISCLAIMER: This is a work-in-progress draft.
+
 The primary goal of TLS 1.3 as defined in {{!RFC8446}} is to provide a
 secure channel between two communicating peers; the only requirement
 from the underlying transport is a reliable, in-order data stream.
@@ -108,6 +110,7 @@ and KEM functionality.
 Figure 1 below shows the basic full KEMTLS handshake with both KEMTLS
 modes:
 
+~~~~~
        Client                                           Server
 
 Key  ^ ClientHello
@@ -143,6 +146,7 @@ Auth | {KEMCiphertext*}                                            |  Auth
                  derived from [sender]_application_traffic_secret_N.
 
              Figure 1: Message Flow for Full KEMTLS Handshake
+~~~~~
 
 The handshake can be thought of as having three phases (indicated in
 the diagram above):
@@ -183,36 +187,36 @@ together, in which case both extensions will be supplied.
 The server then sends two messages to establish the Server
 Parameters:
 
-EncryptedExtensions:  responses to ClientHello extensions that are
-   not required to determine the cryptographic parameters, other than
-   those that are specific to individual certificates.
+* EncryptedExtensions:  responses to ClientHello extensions that are
+  not required to determine the cryptographic parameters, other than
+  those that are specific to individual certificates.
 
-CertificateRequest:  if certificate-based client authentication is
-   desired, the desired parameters for that certificate.  This
-   message is omitted if client authentication is not desired.
+* CertificateRequest:  if certificate-based client authentication is
+  desired, the desired parameters for that certificate.  This
+  message is omitted if client authentication is not desired.
 
 Finally, the client and server exchange Authentication messages.
 KEMTLS uses the same set of messages every time that certificate-based
 authentication is needed.  (PSK-based authentication happens as a
 side effect of key exchange.)  Specifically:
 
-Certificate:  The certificate of the endpoint and any per-certificate
-   extensions.  This message is omitted by the server if not
-   authenticating with a certificate and by the client if the server
-   did not send CertificateRequest (thus indicating that the client
-   should not authenticate with a certificate). The Certificate
-   should include a long-term public KEM key.
-   // TODO: can KEMTLS authenticate with anything else but a Cert?
+* Certificate:  The certificate of the endpoint and any per-certificate
+  extensions.  This message is omitted by the server if not
+  authenticating with a certificate and by the client if the server
+  did not send CertificateRequest (thus indicating that the client
+  should not authenticate with a certificate). The Certificate
+  should include a long-term public KEM key.
+  // TODO: can KEMTLS authenticate with anything else but a Cert?
 
-KEMCiphertext:  A key encapsulation against the certificate's long-term
+* KEMCiphertext:  A key encapsulation against the certificate's long-term
   public key, which yields an implicitly authenticated shared secret.
   This message is omitted by the Client if a CertificateRequest has
   not been sent.
 
-Finished:  A MAC (Message Authentication Code) over the entire
-   handshake.  This message provides key confirmation and binds the
-   endpoint's identity to the exchanged keys.
-   TODO: will there be a PSK mode?
+* Finished:  A MAC (Message Authentication Code) over the entire
+  handshake.  This message provides key confirmation and binds the
+  endpoint's identity to the exchanged keys.
+  TODO: will there be a PSK mode?
 
 Upon receiving the server's messages, the client responds with its
 Authentication messages, namely Certificate and KEMCiphertext (if
