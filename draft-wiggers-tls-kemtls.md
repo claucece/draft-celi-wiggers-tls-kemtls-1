@@ -56,7 +56,7 @@ The primary goal of TLS 1.3 as defined in {{!RFC8446}} is to provide a
 secure channel between two communicating peers; the only requirement
 from the underlying transport is a reliable, in-order data stream.
 Due to the advent of quantum computers, moving the TLS ecosystem
-to post-quantum cryptography is a need. The protocol achieving should
+to post-quantum cryptography is a need. The protocol achieving that
 goal is called KEMTLS. Specifically, this post-quantum secure channel
 should provide the following properties:
 
@@ -75,26 +75,16 @@ should provide the following properties:
 -  Integrity: Data sent over the channel after establishment cannot
    be modified by attackers without detection.
 
-KEMTLS consists of two primary components:
-
--  A handshake protocol that authenticates the communicating parties,
-   negotiates cryptographic modes and parameters, and establishes
-   shared keying material.  The handshake protocol is designed to resist
-   tampering; an active attacker should not be able to force the peers
-   to negotiate different parameters than they would if the connection
-   were not under attack. This is model after TLS 1.3.
-
--  A record protocol that uses the parameters established
-   by the handshake protocol to protect traffic between the
-   communicating peers.  The record protocol divides traffic up into
-   a series of records, each of which is independently protected
-   using the traffic keys. This sub-protocol is the same as used in TLS
-   1.3.
+KEMTLS is provided as an extension to TLS 1.3, but it heavily modifies
+the handshake protocol of it.
 
 In this document, we will describe two modes in which KEMTLS can be used:
 a full post-quantum mode where only post-quantum algorithms are used
 and a hybrid post-quantum mode where traditional and post-quantum
 algorithms are combined.
+
+Note that KEMTLS can also be used in any of those modes with cached
+information to reduce the number of round trips it needs to perform.
 
 # Requirements Notation
 
