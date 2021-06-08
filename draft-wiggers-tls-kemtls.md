@@ -101,6 +101,8 @@ and KEM functionality.
 
 # Protocol Overview
 
+// TODO: the extension itself can advertise the signature algos and kems
+
 Figure 1 below shows the basic full KEMTLS handshake with both KEMTLS
 modes:
 
@@ -108,19 +110,20 @@ modes:
        Client                                           Server
 
 Key  ^ ClientHello
-Exch | + kem_key_share*
+Exch | + kem_tls_extension
+     | + kem_key_share
      | + key_share*
-     | + kem_signature_algorithms*
-     v + signatuere_algorithms*     -------->
+     | + kem_signature_algorithms
+     v + signature_algorithms*      -------->
                                                       ServerHello  ^ Key
-                                                 + kem_key_share*  | Exch
+                                                 + kem_key_share   | Exch
                                                      + key_share*  v Exch
                                             {EncryptedExtensions}  ^  Server
-                                            {CertificateRequest*}  v  Params
-     ^                                             {Certificate*}  ^
-Auth | {KEMCiphertext*}                                            |  Auth
-     | {Certificate*}               -------->                      |
-     |                              <--------    {KEMCiphertext*}  |
+                                             {CertificateRequest}  v  Params
+     ^                                              {Certificate}  ^
+Auth | {KEMCiphertext}                                             |  Auth
+     | {Certificate}                -------->                      |
+     |                              <--------     {KEMCiphertext}  |
      | {Finished}                   -------->                      |
      | [Application Data*]          -------->                      |
      v                              <-------           {Finished}  |
@@ -142,41 +145,27 @@ Auth | {KEMCiphertext*}                                            |  Auth
              Figure 1: Message Flow for Full KEMTLS Handshake
 ~~~~~
 
-The handshake can be thought of as having three phases (indicated in
-the diagram above):
-
--  Key Exchange: Establish shared keying material and select the
-   cryptographic parameters.  Everything after this phase is
-   encrypted and preserves post-quantum confidentiality.
-
--  Server Parameters: Establish other handshake parameters
-   (whether the client is authenticated, application-layer protocol
-   support, etc.).
-
--  Authentication: Authenticate the server (and, optionally, the
-   client) and provide key confirmation and handshake integrity.
-   This is post-quantum authentication.
+The handshake can be thought of in the same three phases as TLS 1.3, while
+achieving both post-quantum confidentiality and post-quantum authentication
+(certificate-based).
 
 In the Key Exchange phase, the client sends the ClientHello
 message, which contains a random nonce (ClientHello.random); its
-offered protocol versions (which should include support for KEMTLS);
+offered protocol versions; the KEMTLS extension,
 a list of symmetric cipher/HKDF hash pairs; a set of KEM key
-shares (in the "kem_key_share" extension), either a set of
-pre-shared key labels (in the "pre_shared_key" extension), or both;
-and potentially additional extensions. Additional fields and/or
-messages may also be present for middlebox compatibility.
+shares (in the "kem_key_share" extension) and classic key shares (if using
+a hybrid mode); and potentially additional extensions.
 
-The server processes the ClientHello and determines the appropriate
-cryptographic parameters for the connection.  It then responds with
-its own ServerHello, which indicates the negotiated connection parameters.
-The combination of the ClientHello and the ServerHello determines the shared
-keys.  The ServerHello contains a "kem_key_share" extension with
-the server's ephemeral KEM share; the server's share MUST
-be in the same group as one of the client's shares.  If PSK key
-establishment is in use, then the ServerHello contains a
-"pre_shared_key" extension indicating which of the client's offered
-PSKs was selected.  Note that implementations can use KEM and PSK
-together, in which case both extensions will be supplied.
+The server processes the ClientHello, checks its support for KEMTLS
+and determines the appropriate cryptographic parameters for the connection.
+It then responds with its own ServerHello, which indicates the negotiated
+connection parameters. The combination of the ClientHello and the
+ServerHello determines the shared keys.  The ServerHello contains
+a "kem_key_share" extension with the server's ephemeral KEM
+share; the server's share MUST be in the same group as one of the client's
+shares.  If a hybrid mode is in use, the ServerHello contains a "key_share"
+extension with the server's ephemeral share, which MUST be in the same
+group as the client's shares.
 
 The server then sends two messages to establish the Server
 Parameters:
@@ -185,32 +174,24 @@ Parameters:
   not required to determine the cryptographic parameters, other than
   those that are specific to individual certificates.
 
-* CertificateRequest:  if certificate-based client authentication is
-  desired, the desired parameters for that certificate.  This
-  message is omitted if client authentication is not desired.
+* CertificateRequest:  in KEMTLS, only certificate-based client
+  authentication is desired, so the server sends the desired parameters
+  for that certificate.  This message is omitted if client authentication
+  is not desired.
 
 Finally, the client and server exchange Authentication messages.
 KEMTLS uses the same set of messages every time that certificate-based
-authentication is needed.  (PSK-based authentication happens as a
-side effect of key exchange.)  Specifically:
+authentication is needed.  Specifically:
 
 * Certificate:  The certificate of the endpoint and any per-certificate
-  extensions.  This message is omitted by the server if not
-  authenticating with a certificate and by the client if the server
+  extensions.  This message is omitted by the client if the server
   did not send CertificateRequest (thus indicating that the client
   should not authenticate with a certificate). The Certificate
-  should include a long-term public KEM key.
-  // TODO: can KEMTLS authenticate with anything else but a Cert?
+  should include a long-term public KEM key. If a hybrid mode is in
+  use, the Certificate should also include a long-term public key.
 
 * KEMCiphertext:  A key encapsulation against the certificate's long-term
   public key, which yields an implicitly authenticated shared secret.
-  This message is omitted by the Client if a CertificateRequest has
-  not been sent.
-
-* Finished:  A MAC (Message Authentication Code) over the entire
-  handshake.  This message provides key confirmation and binds the
-  endpoint's identity to the exchanged keys.
-  TODO: will there be a PSK mode?
 
 Upon receiving the server's messages, the client responds with its
 Authentication messages, namely Certificate and KEMCiphertext (if
