@@ -2,9 +2,9 @@
 
 This is the working area for the individual Internet-Draft, "KEMTLS".
 
-* [Editor's Copy](https://chris-wood.github.io/draft-wiggers-tls-kemtls/#go.draft-wiggers-tls-kemtls.html)
-* [Individual Draft](https://tools.ietf.org/html/draft-wiggers-tls-kemtls)
-* [Compare Editor's Copy to Individual Draft](https://chris-wood.github.io/draft-wiggers-tls-kemtls/#go.draft-wiggers-tls-kemtls.diff)
+* [Editor's Copy](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-wiggers-tls-kemtls.html)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-wiggers-tls-kemtls)
+* [Compare Editor's Copy to Individual Draft](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-wiggers-tls-kemtls.diff)
 
 ## Building the Draft
 
@@ -21,4 +21,4 @@ This requires that you have the necessary software installed.  See
 ## Contributing
 
 See the
-[guidelines for contributions](https://github.com/chris-wood/draft-wiggers-tls-kemtls/blob/master/CONTRIBUTING.md).
+[guidelines for contributions](https://github.com/claucece/draft-celi-wiggers-tls-kemtls.md/blob/master/CONTRIBUTING.md).
