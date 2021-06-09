@@ -1,0 +1,1497 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>KEMTLS</title>
+<meta content="Thom Wiggers" name="author">
+<meta content="Sofía Celi" name="author">
+<meta content="
+       TODO 
+    " name="description">
+<meta content="xml2rfc 3.8.0" name="generator">
+<meta content="Internet-Draft" name="keyword">
+<meta content="draft-wiggers-tls-kemtls-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.8.0
+    Python 3.8.10
+    appdirs 1.4.4
+    ConfigArgParse 1.2.3
+    google-i18n-address 2.4.0
+    html5lib 1.1
+    intervaltree 3.1.0
+    Jinja2 2.11.2
+    kitchen 1.2.6
+    lxml 4.6.3
+    pycountry 20.7.3
+    pyflakes 2.2.0
+    PyYAML 5.3.1
+    requests 2.25.1
+    setuptools 51.3.3
+    six 1.15.0
+-->
+<link href="draft-wiggers-tls-kemtls.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@import url('https://martinthomson.github.io/i-d-template/fonts.css');
+
+html {
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  scrollbar-color: #bbb #eee;
+}
+@media (prefers-color-scheme: dark) {
+html {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+#title, h1, h2, h3, h4, h5, h6 {
+  font-family: "Cabin Condensed", sans-serif;
+  font-weight: 600;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+#title, #rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+#rfcnum + #title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+}
+#abstract+p, #abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 18px;
+  line-height: 24px;
+}
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+}
+ol ol, ul ul, ol ul, ul ol {
+  margin-left: 1em;
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+.ulCompact li {
+  margin: 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+}
+ul.empty li, .ulEmpty li {
+  margin-top: 0.5em;
+}
+ul.compact, .ulCompact,
+ol.compact, .olCompact {
+  line-height: 100%;
+  margin: 0 0 0 2em;
+}
+
+/* definition lists */
+dl {
+}
+dl > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl > dd {
+  margin-bottom: .8em;
+  min-height: 1.3em;
+}
+dl.compact > dd, .dlCompact > dd {
+  margin-bottom: 0em;
+}
+dl > dd > dl {
+  margin-top: 0.5em;
+  margin-bottom: 0em;
+}
+dd.break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href].selfRef {
+  color: var(--text-color);
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px 'Oxygen Mono', monospace;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+}
+@media screen {
+  pre {
+    display: inline-block;
+    overflow-x: auto;
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  pre + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+tr:nth-child(2n) > td {
+  background-color: var(--background-color);
+}
+tr:nth-child(2n+1) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody > tr:nth-child(2n) > td {
+  background-color: var(--highlight-color);
+}
+thead+tbody > tr:nth-child(2n+1) > td {
+  background-color: var(--background-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+}
+a.pilcrow[href] { color: var(--pilcrow-weak); }
+a.pilcrow[href]:hover { text-decoration: none; }
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+}
+
+.role {
+  font-variant: all-small-caps;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 8em;
+}
+#identifiers dt {
+  width: var(--identifier-width);
+  margin: 0;
+  clear: left;
+  float: left;
+  text-align: right;
+}
+#identifiers dd {
+  margin: 0 0 0 calc(1em + var(--identifier-width));
+  min-width: 5em;
+}
+#identifiers .authors .author {
+  display: inline-block;
+  margin-right: 1.5em;
+}
+#identifiers .authors .org {
+  font-style: italic;
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: left;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+}
+#toc nav ul {
+  margin: 0 0.5em 0 0;
+  padding: 0;
+  list-style: none;
+}
+#toc nav li {
+  line-height: 1.3em;
+  margin: 0.75em 0;
+  padding-left: 1.2em;
+  text-indent: -1.2em;
+}
+#toc a.xref {
+  white-space: normal;
+}
+/* references */
+.references dt {
+  text-align: right;
+  font-weight: bold;
+  min-width: 7em;
+}
+.references dd {
+  margin-left: 8em;
+  overflow: auto;
+}
+
+.refInstance {
+  margin-bottom: 1.25em;
+}
+
+.references .ascii {
+  margin-bottom: 0.25em;
+}
+
+/* index */
+.index ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+  list-style: none;
+}
+.index ul ul {
+  margin: 0;
+}
+.index li {
+  margin: 0;
+  text-indent: -2em;
+  padding-left: 2em;
+  padding-bottom: 5px;
+}
+.indexIndex {
+  margin: 0.5em 0 1em;
+}
+.index a {
+  font-weight: 700;
+}
+/* make the index two-column on all but the smallest screens */
+@media (min-width: 500px) {
+  .index ul {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  .index ul ul {
+    column-count: 1;
+    column-gap: 0;
+  }
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  margin: 1em 0;
+}
+address.vcard .nameRole {
+  font-weight: 700;
+  margin-left: 0;
+}
+address.vcard .label {
+  margin: 0.5em 0;
+}
+address.vcard .type {
+  display: none;
+}
+.alternative-contact {
+  margin: 1.5em 0 1em;
+}
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+/* alternative layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc.active {
+      opacity: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+  }
+  #toc h2::before { /* css hamburger */
+    float: right;
+    position: relative;
+    width: 1em;
+    height: 1px;
+    left: -164px;
+    margin: 8px 0 0 0;
+    background: white none repeat scroll 0 0;
+    box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+    content: "";
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active nav {
+    display: block;
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:link,
+  #toc h2 a:focus,
+  #toc h2 a:hover,
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin-top: 2px;
+  }
+}
+
+/* alternative layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  #toc nav > ul  {
+    margin-bottom: 2em;
+  }
+  #toc ul {
+    margin: 0 0 0 4px;
+    font-size: var(--small-font-size);
+  }
+  #toc ul p, #toc ul li {
+    margin: 2px 0;
+    line-height: 22px;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre {
+    page-break-inside: avoid;
+  }
+  figure {
+    overflow: scroll;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  h2+*, h3+*, h4+*, h5+*, h6+* {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Changes introduced to fix issues found during implementation */
+
+/* Separate body from document info even without intervening H1 */
+section {
+  clear: both;
+}
+
+/* Top align author divs, to avoid names without organization dropping level with org names */
+.author {
+  vertical-align: top;
+}
+
+/* Style section numbers with more space between number and title */
+.section-number {
+  padding-right: 0.5em;
+}
+
+/* Add styling for a link in the ToC that points to the top of the document */
+a.toplink {
+  float: right;
+  margin: 8px 0.5em 0;
+}
+
+/* Fix the dl styling to match the RFC 7992 attributes */
+dl > dt,
+dl.dlParallel > dt {
+  float: left;
+  margin-right: 1em;
+}
+dl.dlNewline > dt {
+  float: none;
+}
+
+/* Provide styling for table cell text alignment */
+table .text-left, table .text-left {
+  text-align: left;
+}
+table .text-center, table .text-center {
+  text-align: center;
+}
+table .text-right, table .text-right {
+  text-align: right;
+}
+
+/* Make the alternative author contact information look less like just another
+   author, and group it closer with the primary author contact information */
+.alternative-contact {
+  margin: 0.5em 0 0.25em 0;
+}
+address .non-ascii {
+  margin: 0 0 0 2em;
+}
+
+/* With it being possible to set tables with alignment
+  left, center, and right, { width: 100%; } does not make sense */
+table {
+  width: auto;
+}
+
+/* Avoid reference text that sits in a block with very wide left margin,
+   because of a long floating dt label.*/
+.references dd {
+  overflow: visible;
+}
+
+/* Control caption placement */
+caption {
+  caption-side: bottom;
+}
+
+/* Limit the width of the author address vcard, so names in right-to-left
+   script don't end up on the other side of the page. */
+
+address.vcard {
+  max-width: 20em;
+  margin-right: auto;
+}
+
+/* For address alignment dependent on LTR or RTL scripts */
+address div.left {
+  text-align: left;
+}
+address div.right {
+  text-align: right;
+}
+
+/* Give the table caption label the same styling as the figcaption */
+
+@media print {
+  .toplink {
+    display: none;
+  }
+
+  /* avoid overwriting the top border line with the ToC header */
+  #toc {
+    padding-top: 1px;
+  }
+
+  /* Avoid page breaks inside dl and author address entries */
+  dd {
+    page-break-before: avoid;
+  }
+  .vcard {
+    page-break-inside: avoid;
+  }
+
+}
+/* Tweak the bcp14 keyword presentation */
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: bold;
+  font-size: 0.9em;
+}
+</style>
+
+</head>
+<body>
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">KEMTLS</td>
+<td class="right">June 2021</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Wiggers &amp; Celi</td>
+<td class="center">Expires 11 December 2021</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">tls</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-wiggers-tls-kemtls-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2021-06-09" class="published">9 June 2021</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2021-12-11">11 December 2021</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">T. Wiggers</div>
+<div class="org">Radboud University</div>
+</div>
+<div class="author">
+      <div class="author-name">S. Celi</div>
+<div class="org">Cloudflare</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">KEMTLS</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">TODO<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-discussion-venues">
+<a href="#name-discussion-venues" class="section-name selfRef">Discussion Venues</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">Discussion of this document takes place on the
+  Transport Layer Security Working Group mailing list (tls@ietf.org),
+  which is archived at <span><a href="https://mailarchive.ietf.org/arch/browse/tls/">https://mailarchive.ietf.org/arch/browse/tls/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">Source for this draft and an issue tracker can be found at
+  <span><a href="https://github.com/claucece/draft-celi-wiggers-tls-kemtls.md">https://github.com/claucece/draft-celi-wiggers-tls-kemtls.md</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 11 December 2021.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2021 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Simplified BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Simplified BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1" class="keepWithNext"><a href="#section-1" class="xref">1</a>.  <a href="#name-introduction" class="xref">Introduction</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1" class="keepWithNext"><a href="#section-2" class="xref">2</a>.  <a href="#name-requirements-notation" class="xref">Requirements Notation</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1" class="keepWithNext"><a href="#section-3" class="xref">3</a>.  <a href="#name-terminology" class="xref">Terminology</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-protocol-overview" class="xref">Protocol Overview</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.4.2.1">
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-resumption-and-pre-shared-k" class="xref">Resumption and Pre-Shared Key (PSK)</a></p>
+</li>
+              <li class="toc ulEmpty compact" id="section-toc.1-1.4.2.2">
+                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-prior-knowledge-kem-tls" class="xref">Prior-knowledge KEM-TLS</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="xref">5</a>.  <a href="#name-handshake-protocol" class="xref">Handshake protocol</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#section-6" class="xref">6</a>.  <a href="#name-key-exchange-messages" class="xref">Key Exchange Messages</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#section-7" class="xref">7</a>.  <a href="#name-key-schedule" class="xref">Key schedule</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#section-7.1" class="xref">7.1</a>.  <a href="#name-negotiation" class="xref">Negotiation</a></p>
+</li>
+              <li class="toc ulEmpty compact" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#section-7.2" class="xref">7.2</a>.  <a href="#name-handshake-secret" class="xref">Handshake Secret</a></p>
+</li>
+              <li class="toc ulEmpty compact" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#section-7.3" class="xref">7.3</a>.  <a href="#name-authenticated-handshake-sec" class="xref">Authenticated Handshake Secret</a></p>
+</li>
+              <li class="toc ulEmpty compact" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#section-7.4" class="xref">7.4</a>.  <a href="#name-finished-keys" class="xref">Finished keys</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#section-8" class="xref">8</a>.  <a href="#name-protocol-mechanics" class="xref">Protocol Mechanics</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#section-9" class="xref">9</a>.  <a href="#name-middlebox-compatibility-con" class="xref">(Middlebox) Compatibility Considerations</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#section-10" class="xref">10</a>. <a href="#name-integration-with-delegated-" class="xref">Integration with Delegated Credentials</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#section-11" class="xref">11</a>. <a href="#name-security-considerations" class="xref">Security Considerations</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.12">
+            <p id="section-toc.1-1.12.1"><a href="#section-12" class="xref">12</a>. <a href="#name-iana-considerations" class="xref">IANA Considerations</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.13">
+            <p id="section-toc.1-1.13.1"><a href="#section-13" class="xref">13</a>. <a href="#name-acknowledgements" class="xref">Acknowledgements</a></p>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.14">
+            <p id="section-toc.1-1.14.1"><a href="#section-14" class="xref">14</a>. <a href="#name-references" class="xref">References</a></p>
+<ul class="toc ulEmpty compact">
+<li class="toc ulEmpty compact" id="section-toc.1-1.14.2.1">
+                <p id="section-toc.1-1.14.2.1.1"><a href="#section-14.1" class="xref">14.1</a>.  <a href="#name-normative-references" class="xref">Normative References</a></p>
+</li>
+              <li class="toc ulEmpty compact" id="section-toc.1-1.14.2.2">
+                <p id="section-toc.1-1.14.2.2.1"><a href="#section-14.2" class="xref">14.2</a>.  <a href="#name-informative-references" class="xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="toc ulEmpty compact" id="section-toc.1-1.15">
+            <p id="section-toc.1-1.15.1"><a href="#section-appendix.a" class="xref"></a><a href="#name-authors-addresses" class="xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">DISCLAIMER: This is a work-in-progress draft.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">The primary goal of TLS 1.3 as defined in <span>[<a href="#RFC8446" class="xref">RFC8446</a>]</span> is to provide a
+secure channel between two communicating peers; the only requirement
+from the underlying transport is a reliable, in-order data stream.
+Due to the advent of quantum computers, moving the TLS ecosystem
+to post-quantum cryptography is a need. The protocol achieving that
+goal is called KEMTLS. Specifically, this post-quantum secure channel
+should provide the following properties:<a href="#section-1-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-1-3.1">Authentication: The server side of the channel is always
+authenticated; the client side is optionally authenticated.
+Authentication can happen via asymmetric cryptography by the
+usage of key-encapsulation mechanisms (KEM) by using the long-term
+KEM public keys in the Certificate.<a href="#section-1-3.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-1-3.2">Confidentiality: Data sent over the channel after establishment is
+only visible to the intended endpoints.  KEMTLS does not hide the
+length of the data it transmits, though endpoints are able to pad
+KEMTLS records in order to obscure lengths and improve protection
+against traffic analysis techniques.<a href="#section-1-3.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-1-3.3">Integrity: Data sent over the channel after establishment cannot
+be modified by attackers without detection.<a href="#section-1-3.3" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-1-4">KEMTLS is provided as an extension to TLS 1.3, but it heavily modifies
+the handshake protocol of it.<a href="#section-1-4" class="pilcrow">¶</a></p>
+<p id="section-1-5">In this document, we will describe two modes in which KEMTLS can be used:
+a full post-quantum mode where only post-quantum algorithms are used
+and a hybrid post-quantum mode where traditional and post-quantum
+algorithms are combined.<a href="#section-1-5" class="pilcrow">¶</a></p>
+<p id="section-1-6">Note that KEMTLS can also be used in any of those modes with cached
+information to reduce the number of round trips it needs to perform.<a href="#section-1-6" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="requirements-notation">
+<section id="section-2">
+      <h2 id="name-requirements-notation">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-requirements-notation" class="section-name selfRef">Requirements Notation</a>
+      </h2>
+<p id="section-2-1">The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL
+NOT", "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED",
+"MAY", and "OPTIONAL" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="terminology">
+<section id="section-3">
+      <h2 id="name-terminology">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-terminology" class="section-name selfRef">Terminology</a>
+      </h2>
+<p id="section-3-1">TODO: add definition of traditional algorithms, post-quantum algorithms
+and KEM functionality.<a href="#section-3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="protocol-overview">
+<section id="section-4">
+      <h2 id="name-protocol-overview">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-protocol-overview" class="section-name selfRef">Protocol Overview</a>
+      </h2>
+<p id="section-4-1">// TODO: the extension itself can advertise the signature algos and kems<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-2">Figure 1 below shows the basic full KEMTLS handshake with both KEMTLS
+modes:<a href="#section-4-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-4-3">
+<pre>
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + kem_tls_extension
+     | + kem_key_share
+     | + key_share*
+     | + kem_signature_algorithms
+     v + signature_algorithms*      --------&gt;
+                                                      ServerHello  ^ Key
+                                                 + kem_key_share   | Exch
+                                                     + key_share*  v Exch
+                                            {EncryptedExtensions}  ^  Server
+                                             {CertificateRequest}  v  Params
+     ^                                              {Certificate}  ^
+Auth | {KEMCiphertext}                                             |  Auth
+     | {Certificate}                --------&gt;                      |
+     |                              &lt;--------     {KEMCiphertext}  |
+     | {Finished}                   --------&gt;                      |
+     | [Application Data*]          --------&gt;                      |
+     v                              &lt;-------           {Finished}  |
+                                                                   v
+       [Application Data]           &lt;-------&gt;  [Application Data]
+
+              +  Indicates noteworthy extensions sent in the
+                 previously noted message.
+
+              *  Indicates optional or situation-dependent
+                 messages/extensions that are not always sent.
+
+              {} Indicates messages protected using keys
+                 derived from a [sender]_handshake_traffic_secret.
+
+              [] Indicates messages protected using keys
+                 derived from [sender]_application_traffic_secret_N.
+
+             Figure 1: Message Flow for Full KEMTLS Handshake
+</pre><a href="#section-4-3" class="pilcrow">¶</a>
+</div>
+<p id="section-4-4">The handshake can be thought of in the same three phases as TLS 1.3, while
+achieving both post-quantum confidentiality and post-quantum authentication
+(certificate-based).<a href="#section-4-4" class="pilcrow">¶</a></p>
+<p id="section-4-5">In the Key Exchange phase, the client sends the ClientHello
+message, which contains a random nonce (ClientHello.random); its
+offered protocol versions; the KEMTLS extension,
+a list of symmetric cipher/HKDF hash pairs; a set of KEM key
+shares (in the "kem_key_share" extension) and classic key shares (if using
+a hybrid mode); and potentially additional extensions.<a href="#section-4-5" class="pilcrow">¶</a></p>
+<p id="section-4-6">The server processes the ClientHello, checks its support for KEMTLS
+and determines the appropriate cryptographic parameters for the connection.
+It then responds with its own ServerHello, which indicates the negotiated
+connection parameters. The combination of the ClientHello and the
+ServerHello determines the shared keys.  The ServerHello contains
+a "kem_key_share" extension with the server's ephemeral KEM
+share; the server's share MUST be in the same group as one of the client's
+shares.  If a hybrid mode is in use, the ServerHello contains a "key_share"
+extension with the server's ephemeral share, which MUST be in the same
+group as the client's shares.<a href="#section-4-6" class="pilcrow">¶</a></p>
+<p id="section-4-7">The server then sends two messages to establish the Server
+Parameters:<a href="#section-4-7" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-8.1">EncryptedExtensions:  responses to ClientHello extensions that are
+not required to determine the cryptographic parameters, other than
+those that are specific to individual certificates.<a href="#section-4-8.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-8.2">CertificateRequest:  in KEMTLS, only certificate-based client
+authentication is desired, so the server sends the desired parameters
+for that certificate.  This message is omitted if client authentication
+is not desired.<a href="#section-4-8.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-9">Finally, the client and server exchange Authentication messages.
+KEMTLS uses the same set of messages every time that certificate-based
+authentication is needed.  Specifically:<a href="#section-4-9" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-4-10.1">Certificate:  The certificate of the endpoint and any per-certificate
+extensions.  This message is omitted by the client if the server
+did not send CertificateRequest (thus indicating that the client
+should not authenticate with a certificate). The Certificate
+should include a long-term public KEM key. If a hybrid mode is in
+use, the Certificate should also include a long-term public key.<a href="#section-4-10.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-4-10.2">KEMCiphertext:  A key encapsulation against the certificate's long-term
+public key, which yields an implicitly authenticated shared secret.<a href="#section-4-10.2" class="pilcrow">¶</a>
+</li>
+      </ul>
+<p id="section-4-11">Upon receiving the server's messages, the client responds with its
+Authentication messages, namely Certificate and KEMCiphertext (if
+requested), and Finished.<a href="#section-4-11" class="pilcrow">¶</a></p>
+<p id="section-4-12">At this point, the handshake is complete, and the client and server
+derive the keying material required by the record layer to exchange
+application-layer data protected through authenticated encryption.<a href="#section-4-12" class="pilcrow">¶</a></p>
+<p id="section-4-13">Application Data MUST NOT be sent prior to sending the Finished
+message, except as specified in Section 2.3.  Note that while the
+client may send Application Data prior to receiving the server's
+last Authentication message, any data sent at that point is, of course,
+being sent to an implicitly authenticated peer. It is worth noting
+that Application Data sent prior to receiving the server's last
+Authentication message can be subject to a client downgrade
+attack. Full downgrade resilience is only achieved when explicit
+authentication is achieved: when the Client receives the Finished
+message from the Server.<a href="#section-4-13" class="pilcrow">¶</a></p>
+<div id="resumption-and-pre-shared-key-psk">
+<section id="section-4.1">
+        <h3 id="name-resumption-and-pre-shared-k">
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-resumption-and-pre-shared-k" class="section-name selfRef">Resumption and Pre-Shared Key (PSK)</a>
+        </h3>
+<p id="section-4.1-1">TODO: can it be used with KEMTLS?<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="prior-knowledge-kem-tls">
+<section id="section-4.2">
+        <h3 id="name-prior-knowledge-kem-tls">
+<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-prior-knowledge-kem-tls" class="section-name selfRef">Prior-knowledge KEM-TLS</a>
+        </h3>
+<p id="section-4.2-1">Given the added number of round-trips to the TLS 1.3, KEMTLS'
+handshake can be improved by the usage of pre-distributed
+KEM authentication keys to achieve explicit authentication
+and full downgrade resilience. A party's long-term KEM
+authentication key can be cached in advance.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="handshake-protocol">
+<section id="section-5">
+      <h2 id="name-handshake-protocol">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-handshake-protocol" class="section-name selfRef">Handshake protocol</a>
+      </h2>
+<p id="section-5-1">TODO: add KEMCiphertext to the <code>HandshakeType</code> and forbid
+<code>CertificateVerify</code>.<a href="#section-5-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-exchange-messages">
+<section id="section-6">
+      <h2 id="name-key-exchange-messages">
+<a href="#section-6" class="section-number selfRef">6. </a><a href="#name-key-exchange-messages" class="section-name selfRef">Key Exchange Messages</a>
+      </h2>
+<p id="section-6-1">TODO: huge todo<a href="#section-6-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="key-schedule">
+<section id="section-7">
+      <h2 id="name-key-schedule">
+<a href="#section-7" class="section-number selfRef">7. </a><a href="#name-key-schedule" class="section-name selfRef">Key schedule</a>
+      </h2>
+<div id="negotiation">
+<section id="section-7.1">
+        <h3 id="name-negotiation">
+<a href="#section-7.1" class="section-number selfRef">7.1. </a><a href="#name-negotiation" class="section-name selfRef">Negotiation</a>
+        </h3>
+<ol start="1" type="1" class="normal type-1" id="section-7.1-1">
+<li id="section-7.1-1.1">Add KEMs to <code>supported_groups</code> and KEM public key to <code>key_shares</code>.<a href="#section-7.1-1.1" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.2">Add <code>KEMTLSwithSomeKEM</code> to <code>signature_algorithms</code>.<a href="#section-7.1-1.2" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.3">Alternatively, use DC draft and add it to <code>signature_algorithms_dc</code>.<a href="#section-7.1-1.3" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.4">Server replies with KEM ciphertext encapsulated to KEM public key (or HRR).<a href="#section-7.1-1.4" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.5">Server replies with CA-signed KEM public-key X.509 certificate.<a href="#section-7.1-1.5" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.6">Alternatively, use DC draft and reply with KEM delegated credential.<a href="#section-7.1-1.6" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.7">Server MUST NOT submit <code>CertificateVerify</code> message.<a href="#section-7.1-1.7" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.8">Client detects that KEMTLS is being used via the "signature algorithm", ie. the type of credential provided by the server.<a href="#section-7.1-1.8" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.9">Client encapsulates ciphertext to server and transmits it as <code>ClientKEMCiphertext</code> (or piggy-back on <code>ClientKeyExchange</code>?).<a href="#section-7.1-1.9" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.10">Client submits <code>ClientFinished</code>.<a href="#section-7.1-1.10" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.11">Client completed handshake.<a href="#section-7.1-1.11" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.12">Server submits <code>ServerFinished</code>.<a href="#section-7.1-1.12" class="pilcrow">¶</a>
+</li>
+          <li id="section-7.1-1.13">Server completes handshake.<a href="#section-7.1-1.13" class="pilcrow">¶</a>
+</li>
+        </ol>
+<p id="section-7.1-2">TODO probably split off DC into separate paragraph.<a href="#section-7.1-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="handshake-secret">
+<section id="section-7.2">
+        <h3 id="name-handshake-secret">
+<a href="#section-7.2" class="section-number selfRef">7.2. </a><a href="#name-handshake-secret" class="section-name selfRef">Handshake Secret</a>
+        </h3>
+<p id="section-7.2-1">The Handshake secret <code>HS</code> is derived from the ephemeral key exchange
+shared secret.<a href="#section-7.2-1" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.2-2">
+<pre>
+...
+                     v
+ephemeral_kem_shared -&gt; HKDF-Extract = Handshake Secret
+                     v
+...
+</pre><a href="#section-7.2-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="authenticated-handshake-secret">
+<section id="section-7.3">
+        <h3 id="name-authenticated-handshake-sec">
+<a href="#section-7.3" class="section-number selfRef">7.3. </a><a href="#name-authenticated-handshake-sec" class="section-name selfRef">Authenticated Handshake Secret</a>
+        </h3>
+<p id="section-7.3-1">After deriving <code>HS</code>, the Handshake Secret, from the ephemeral keys, we
+need an additional handshake secret in KEMTLS.
+We require this additional handshake secret as we need an (implicitly)
+authenticated handshake secret to encrypt any client credentials under.
+Otherwise we do not have confidentiality for the client certificate.<a href="#section-7.3-1" class="pilcrow">¶</a></p>
+<p id="section-7.3-2"><code>AHS</code> is derived from the hanshake secret and the static shared key.
+We change the derivation of the main secret accordingly.<a href="#section-7.3-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.3-3">
+<pre>
+                  Handshake Secret
+                     |
+                     v
+                    Derive-Secret(., "derived", "")
+                     |
+                     v
+static_server_shared -&gt; HKDF.Extract = Authenticated Handshake Secret
+                     |
+                     +-----&gt; Derive-Secret(., "c ahs traffic",
+                     |                     ClientHello...ClientKemCiphertext)
+                     |                     = client_authenticated_handshake_traffic_secret
+                     |
+                     +-----&gt; Derive-Secret(., "s ahs traffic",
+                     |                     ClientHello...ClientKemCiphertext)
+                     |                     = server_authenticated_handshake_traffic_secret
+                     |
+                     v
+                    Derive-Secret(., "derived", "")
+                     |
+                     v
+static_client_shared -&gt; HKDF.Extract = Main Secret
+                     v
+</pre><a href="#section-7.3-3" class="pilcrow">¶</a>
+</div>
+<p id="section-7.3-4"><code>shared_secret_static_client_kem</code> is the shared secret encapsulated to the client's public key.
+If there is no client authentication, it's simply replaced by <code>0</code>.<a href="#section-7.3-4" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.3-5">
+<pre>
+                     v
+                   0 -&gt; HKDF.Extract = Main Secret
+                     v
+</pre><a href="#section-7.3-5" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+<div id="finished-keys">
+<section id="section-7.4">
+        <h3 id="name-finished-keys">
+<a href="#section-7.4" class="section-number selfRef">7.4. </a><a href="#name-finished-keys" class="section-name selfRef">Finished keys</a>
+        </h3>
+<p id="section-7.4-1">We derived the finished keys from <code>MS</code> instead of from <code>CHTS</code> and <code>SHTS</code>.
+We separate them by individual labels and the transcript.<a href="#section-7.4-1" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-7.4-2">
+<pre>
+finished_client &lt;- HKDF.Expand(MS, "c finished", transcript_up_to_CF)
+finished_server &lt;- HKDF.Expand(MS, "s finished", transcript_up_to_SF)
+</pre><a href="#section-7.4-2" class="pilcrow">¶</a>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="protocol-mechanics">
+<section id="section-8">
+      <h2 id="name-protocol-mechanics">
+<a href="#section-8" class="section-number selfRef">8. </a><a href="#name-protocol-mechanics" class="section-name selfRef">Protocol Mechanics</a>
+      </h2>
+<p id="section-8-1">TODO<a href="#section-8-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="middlebox-compatibility-considerations">
+<section id="section-9">
+      <h2 id="name-middlebox-compatibility-con">
+<a href="#section-9" class="section-number selfRef">9. </a><a href="#name-middlebox-compatibility-con" class="section-name selfRef">(Middlebox) Compatibility Considerations</a>
+      </h2>
+<p id="section-9-1">Like in TLS 1.3, after the ephemeral key is derived
+a <code>ChangeCipherSpec</code> message is sent and the messages afterwards are
+encrypted. This will make the following messages opaque to non-decrypting
+middle boxes.<a href="#section-9-1" class="pilcrow">¶</a></p>
+<p id="section-9-2">The <code>ClientHello</code> and <code>ServerHello</code> messages are still in the clear
+and these require the addition of new <code>key_share</code> types.
+Typical KEM public-key and ciphertext sizes are also significantly bigger
+than pre-quantum (EC)DH keyshares. This may still cause problems.<a href="#section-9-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="integration-with-delegated-credentials">
+<section id="section-10">
+      <h2 id="name-integration-with-delegated-">
+<a href="#section-10" class="section-number selfRef">10. </a><a href="#name-integration-with-delegated-" class="section-name selfRef">Integration with Delegated Credentials</a>
+    </h2>
+</section>
+</div>
+<div id="sec-considerations">
+<section id="section-11">
+      <h2 id="name-security-considerations">
+<a href="#section-11" class="section-number selfRef">11. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-11-1">TODO:<a href="#section-11-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-11-2.1">sending data to an implicitly authenticated and not-full downgrade
+resilient peer<a href="#section-11-2.1" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-11-2.2">address CA and pq keys<a href="#section-11-2.2" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-11-2.3">consider implicit vs explicit authentication<a href="#section-11-2.3" class="pilcrow">¶</a>
+</li>
+        <li class="normal" id="section-11-2.4">consider downgrade resilience<a href="#section-11-2.4" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-12">
+      <h2 id="name-iana-considerations">
+<a href="#section-12" class="section-number selfRef">12. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<ul class="normal">
+<li class="normal" id="section-12-1.1">We need a new OID for each KEM to encode them in X.509 certificates.<a href="#section-12-1.1" class="pilcrow">¶</a>
+</li>
+      </ul>
+</section>
+</div>
+<div id="acknowledgements">
+<section id="section-13">
+      <h2 id="name-acknowledgements">
+<a href="#section-13" class="section-number selfRef">13. </a><a href="#name-acknowledgements" class="section-name selfRef">Acknowledgements</a>
+      </h2>
+<p id="section-13-1">This work has been supported by the European Research Council through Starting Grant No. 805031 (EPOQUE).<a href="#section-13-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<section id="section-14">
+      <h2 id="name-references">
+<a href="#section-14" class="section-number selfRef">14. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<section id="section-14.1">
+        <h3 id="name-normative-references">
+<a href="#section-14.1" class="section-number selfRef">14.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/rfc2119">https://datatracker.ietf.org/doc/html/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://datatracker.ietf.org/doc/html/rfc8174">https://datatracker.ietf.org/doc/html/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8446">[RFC8446]</dt>
+      <dd>
+<span class="refTitle">"*** BROKEN REFERENCE ***"</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+<section id="section-14.2">
+        <h3 id="name-informative-references">
+<a href="#section-14.2" class="section-number selfRef">14.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="KEMTLS">[KEMTLS]</dt>
+      <dd>
+<span class="refAuthor">Stebila, D.</span>, <span class="refAuthor">Schwabe, P.</span>, and <span class="refAuthor">T. Wiggers</span>, <span class="refTitle">"Post-Quantum TLS without Handshake Signatures"</span>, <span class="seriesInfo">DOI 10.1145/3372297.3423350</span>, <span class="seriesInfo">IACR ePrint https://ia.cr/2020/534</span>, <time datetime="2020-11" class="refDate">November 2020</time>, <span>&lt;<a href="https://doi.org/10.1145/3372297.3423350">https://doi.org/10.1145/3372297.3423350</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</section>
+<div id="authors-addresses">
+<section id="section-appendix.a">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Thom Wiggers</span></div>
+<div dir="auto" class="left"><span class="org">Radboud University, Institute of Computing and Information Sciences, Nijmegen, The Netherlands</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:thom@thomwiggers.nl" class="email">thom@thomwiggers.nl</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Sofía Celi</span></div>
+<div dir="auto" class="left"><span class="org">Cloudflare</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:cherenkov@riseuop.net" class="email">cherenkov@riseuop.net</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
