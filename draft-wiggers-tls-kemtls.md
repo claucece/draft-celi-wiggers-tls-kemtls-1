@@ -23,7 +23,7 @@ author: &authors
   - ins: S. Celi
     name: Sofía Celi
     org: "Cloudflare"
-    email: cherenkov@riseuop.net
+    email: cherenkov@riseup.net
 
 normative:
   RFC8446:
