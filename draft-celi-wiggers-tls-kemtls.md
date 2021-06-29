@@ -248,7 +248,6 @@ Auth | <KEMCiphertext>                                             |  Auth
      |                              <--------     {KEMCiphertext}  |
      | {Finished}                   -------->                      |
      | [Cached Server Certificate]
-     | [Cached Server Certificate Request]
      | [Application Data*]          -------->                      |
      v                              <-------           {Finished}  |
                                       [Cached Client Certificate]  |
@@ -371,14 +370,177 @@ enum {
 The table below indicates the messages where a given extension may
 appear:
 
+~~~
    +--------------------------------------------------+-------------+
    | Extension                                        |     TLS 1.3 |
    +--------------------------------------------------+-------------+
-   | kem_ciphertext [RFCTBD]                          |          CH |
-   |                                                  |             |
    | cached_info [RFCTBD]                             |      CH, SH |
    |                                                  |             |
+   | kem_ciphertext [RFCTBD]                          |          CH |
+   |                                                  |             |
    +--------------------------------------------------+-------------+
+~~~
+
+### Signature Algorithms
+
+This extension works the same was as with TLS 1.3; but certain algorithms
+are added to the `SignatureScheme` list:
+
+~~~
+  enum {
+      ...
+      /* EdDSA algorithms */
+      ed25519(0x0807),
+      ed448(0x0808),
+
+      /* RSASSA-PSS algorithms with public key OID RSASSA-PSS */
+      rsa_pss_pss_sha256(0x0809),
+      rsa_pss_pss_sha384(0x080a),
+      rsa_pss_pss_sha512(0x080b),
+
+      /* Post-quantum KEM authentication algorithms */
+      kyber512(TBD),
+      ntru2048509(TBD),
+      light_saber(TBD),
+
+      /* Hybrid authentication algorithms */
+      kyber512_secp256r1(TBD),
+      ntru2048509_secp256r1(TBD),
+      light_saber_secp256r1(TBD),
+
+      kyber512_secp384r1(TBD),
+      ntru2048509_secp384r1(TBD),
+      light_saber_secp384r1(TBD),
+
+      kyber512_secp521r1(TBD),
+      ntru2048509_secp521r1(TBD),
+      light_saber_secp521r1(TBD),
+
+      kyber512_ed25519(TBD),
+      ntru2048509_ed25519(TBD),
+      light_saber_ed25519(TBD),
+
+      kyber512_ed448(TBD),
+      ntru2048509_ed448(TBD),
+      light_saber_ed448(TBD),
+
+      /* Legacy algorithms */
+      rsa_pkcs1_sha1(0x0201),
+      ecdsa_sha1(0x0203),
+
+      /* Reserved Code Points */
+      private_use(0xFE00..0xFFFF),
+      (0xFFFF)
+  } SignatureScheme;
+~~~
+
+The algorithms added here correspond to the round-3 finalists of the post-quantum
+NIST competition targeting a 128 security level.
+
+####  Supported Groups
+
+This extension works the same was as with TLS 1.3; but certain algorithms
+are added to the `NamedGroup` list:
+
+~~~
+  enum {
+
+      /* Elliptic Curve Groups (ECDHE) */
+      secp256r1(0x0017), secp384r1(0x0018), secp521r1(0x0019),
+      x25519(0x001D), x448(0x001E),
+
+      /* Finite Field Groups (DHE) */
+      ffdhe2048(0x0100), ffdhe3072(0x0101), ffdhe4096(0x0102),
+      ffdhe6144(0x0103), ffdhe8192(0x0104),
+
+      /* Post-Quantum KEMs (PQKEM) */
+      Kyber512(TBD), ntru2048509(TBD), light_saber(TBD)
+
+      /* Hybrid KEMs (HKEM) */
+      kyber512_secp256r1(TBD), ntru2048509_secp256r1(TBD),
+      light_saber_secp256r1(TBD),
+
+      kyber512_secp384r1(TBD), ntru2048509_secp384r1(TBD),
+      light_saber_secp384r1(TBD),
+
+      kyber512_secp521r1(TBD), ntru2048509_secp521r1(TBD),
+      light_saber_secp521r1(TBD),
+
+      kyber512_x25519(TBD), ntru2048509_x25519(TBD),
+      light_saber_ed25519(TBD),
+
+      kyber512_x448(TBD), ntru2048509_ed448(TBD),
+      light_saber_ed448(TBD),
+
+      /* Reserved Code Points */
+      ecdhe_private_use(0xFE01..0xFEFF),
+      (0xFFFF)
+  } NamedGroup;
+~~~
+
+The algorithms added here correspond to the round-3 finalists of the post-quantum
+NIST competition targeting a 128 security level.
+
+#### Cached Information
+
+This document defines a new extension type (cached_info(TBD)), which
+is used in ClientHello and ServerHello messages.  The extension type
+is specified as follows.
+
+~~~
+  enum {
+       cached_info(TBD), (65535)
+  } ExtensionType;
+~~~
+
+The extension_data field of this extension, when included in the
+ClientHello, MUST contain the `CachedInformation` structure.  The
+client MAY send multiple CachedObjects of the same `CachedInformationType`.
+This may, for example, be the case when the client has cached multiple
+certificates from the server.
+
+~~~
+  enum {
+       cert(1) (255)
+  } CachedInformationType;
+
+  struct {
+       select (type) {
+         case client:
+           CachedInformationType type;
+           opaque hash_value<1..255>;
+         case server:
+           CachedInformationType type;
+       } body;
+  } CachedObject;
+
+  struct {
+       CachedObject cached_info<1..2^16-1>;
+  } CachedInformation;
+~~~
+
+This document defines the following type:
+
+- 'cert' type for not sending the complete server certificate message:
+   With the type field set to 'cert', the client MUST include the
+   fingerprint of the Certificate message in the hash_value field.
+   For this type, the fingerprint MUST be calculated using the
+   procedure below, using the Certificate message as the input data.
+
+The fingerprint calculation proceeds this way:
+
+1.  Compute the SHA-256 hash of the input data. Note that the computed
+    hash only covers the input data structure (and not any type and
+    length information of the record layer).
+2.  Use the output of the SHA-256 hash.
+
+The purpose of the fingerprint provided by the client is to help the
+server select the correct information.  The fingerprint identifies the server
+certificate (and the corresponding private key) for use with the rest
+of the handshake.
+
+If this extension is not present, the `kem_ciphertext` extension MUST
+not be present as well. If present, it will be ignored.
 
 # Key schedule
 
