@@ -1,9 +1,8 @@
 ---
-# vim: set ft=markdown ts=2 sw=2 tw=0 et :
-
 title: KEMTLS
 abbrev: KEMTLS
 docname: draft-celi-wiggers-tls-kemtls-latest
+date:
 category: info
 
 ipr: trust200902
@@ -13,16 +12,16 @@ keyword: Internet-Draft
 stand_alone: yes
 pi: [toc, sortrefs, symrefs]
 
-author: &authors
-  - ins: T. Wiggers
+author:
+ -
+    ins: T. Wiggers
     name: Thom Wiggers
-    org: "Radboud University, Institute of Computing and Information Sciences, Nijmegen, The Netherlands"
-    abbrev: "Radboud University"
+    org: Radboud University
     email: thom@thomwiggers.nl
-  -
+ -
     ins: S. Celi
     name: Sofía Celi
-    org: "Cloudflare"
+    org: Cloudflare
     email: cherenkov@riseup.net
 
 normative:
