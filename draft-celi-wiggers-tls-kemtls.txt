@@ -66,21 +66,25 @@ Table of Contents
    4.  Protocol Overview
      4.1.  Prior-knowledge KEM-TLS
    5.  Handshake protocol
-   6.  Key Exchange Messages
-   7.  Key schedule
-     7.1.  Negotiation
-     7.2.  Handshake Secret
-     7.3.  Authenticated Handshake Secret
-     7.4.  Finished keys
-   8.  Protocol Mechanics
-   9.  (Middlebox) Compatibility Considerations
-   10. Integration with Delegated Credentials
-   11. Security Considerations
-   12. IANA Considerations
-   13. Acknowledgements
-   14. References
-     14.1.  Normative References
-     14.2.  Informative References
+     5.1.  Key Exchange Messages
+       5.1.1.  Client Hello
+       5.1.2.  Server Hello
+       5.1.3.  Hello Retry Request
+       5.1.4.  Extensions
+   6.  Key schedule
+     6.1.  Negotiation
+     6.2.  Handshake Secret
+     6.3.  Authenticated Handshake Secret
+     6.4.  Finished keys
+   7.  Protocol Mechanics
+   8.  (Middlebox) Compatibility Considerations
+   9.  Integration with Delegated Credentials
+   10. Security Considerations
+   11. IANA Considerations
+   12. Acknowledgements
+   13. References
+     13.1.  Normative References
+     13.2.  Informative References
    Authors' Addresses
 
 1.  Introduction
@@ -263,7 +267,8 @@ Auth | <KEMCiphertext>                                             |  Auth
    1.3, the KEMTLS handshake can be improved by the usage of pre-
    distributed KEM authentication keys to achieve explicit
    authentication and full downgrade resilience as early as possible.  A
-   peer's long-term KEM authentication key can be cached in advance.
+   peer's long-term KEM authentication key can be cached in advance, as
+   well.
 
    Figure 2 below shows a pair of handshakes in which the first
    handshake establishes cached information and the second handshake
@@ -310,18 +315,115 @@ Auth | + kem_ciphertext_extension
 
        [Application Data]           <------->  [Application Data]
 
+   In some applications, such as in a VPN, the client already knows that
+   the server will require mutual authentication.  This means that a
+   client can proactively authenticate by sending its certificate as
+   early in the handshake as possible.  The client's certificate have to
+   be sent encrypted by using the shared secret derived from the
+   kem_ciphertext encapsulation.
+
 5.  Handshake protocol
 
-   TODO: add KEMCiphertext to the "HandshakeType" and forbid
-   "CertificateVerify".
+   The handshake protocol is used to negotiate the security parameters
+   of a connection, as in TLS 1.3.  It uses the same messages, expect
+   for the addition of a "KEMCiphertext" message and does not use the
+   "CertificateVerify" one.
 
-6.  Key Exchange Messages
+   enum {
+             ...
+             encrypted_extensions(8),
+             certificate(11),
+             kem_ciphertext(tbd),
+             certificate_request(13),
+             ...
+             message_hash(254),
+             (255)
+         } HandshakeType;
 
-   TODO: huge todo
+         struct {
+             HandshakeType msg_type;    /* handshake type */
+             uint24 length;             /* remaining bytes in message */
+             select (Handshake.msg_type) {
+                 ...
+                 case encrypted_extensions:  EncryptedExtensions;
+                 case certificate_request:   CertificateRequest;
+                 case certificate:           Certificate;
+                 case kem_ciphertext:        KEMCiphertext;
+                 ...
+             };
+         } Handshake;
 
-7.  Key schedule
+   Protocol messages MUST be sent in the order defined in Section 4.  A
+   peer which receives a handshake message in an unexpected order MUST
+   abort the handshake with an "unexpected_message" alert.
 
-7.1.  Negotiation
+5.1.  Key Exchange Messages
+
+   KEMTLS uses the same key exchange messages as TLS 1.3 with this
+   exceptions:
+
+   *  Usage of a new message "KEMCiphertext".
+
+   *  The "CertificateVerify" message is not used.
+
+   *  Two extensions can be added to the "ClientHello" message:
+      "cached_information" and "kem_ciphertext".
+
+   *  One extensions can be added to the "ServerHello" message:
+      "cached_information".
+
+   KEMTLS preserves the same cryptographic negotiation with the addition
+   of more algorithms to the "supported_groups" and
+   "signature_algorithms".
+
+5.1.1.  Client Hello
+
+   KEMTLS uses the "ClientHello" message as described for TLS 1.3.  When
+   used in a pre-distributed mode, however, two extensions are
+   mandatory: "cached_information" and "kem_ciphertext" for server
+   authentication.  This extensions are described later in the document.
+
+5.1.2.  Server Hello
+
+   KEMTLS uses the "ServerHello" message as described for TLS 1.3.  When
+   used in a pre-distributed mode, however, one extensions is mandatory:
+   "cached_information" for server authentication.  This extension is
+   described later in the document.
+
+5.1.3.  Hello Retry Request
+
+   KEMTLS uses the "ServerHello" message as described for TLS 1.3.  When
+   used in a pre-distributed mode, however, a Hello Retry Request
+   message should not be sent.
+
+5.1.4.  Extensions
+
+   A number of KEMTLS messages contain tag-length-value encoded
+   extensions structures.  We are adding those extensions to the
+   "ExtensionType" list from TLS 1.3.
+
+   enum {
+       ...
+       signature_algorithms_cert(50),              /* RFC 8446 */
+       key_share(51),                              /* RFC 8446 */
+       kem_ciphertext(TBD),                        /* RFC TBD */
+       cached_info(TBD),                           /* RFC TBD */
+       (65535)
+   } ExtensionType;
+
+   The table below indicates the messages where a given extension may
+   appear:
+
+   +--------------------------------------------------+-------------+ |
+   Extension | TLS 1.3 |
+   +--------------------------------------------------+-------------+ |
+   kem_ciphertext [RFCTBD] | CH | | | | | cached_info [RFCTBD] | CH,
+   SH | | | |
+   +--------------------------------------------------+-------------+
+
+6.  Key schedule
+
+6.1.  Negotiation
 
    1.   Add KEMs to "supported_groups" and KEM public key to
         "key_shares".
@@ -357,7 +459,7 @@ Auth | + kem_ciphertext_extension
 
    TODO probably split off DC into separate paragraph.
 
-7.2.  Handshake Secret
+6.2.  Handshake Secret
 
    The Handshake secret "HS" is derived from the ephemeral key exchange
    shared secret.
@@ -368,7 +470,7 @@ Auth | + kem_ciphertext_extension
                         v
    ...
 
-7.3.  Authenticated Handshake Secret
+6.3.  Authenticated Handshake Secret
 
    After deriving "HS", the Handshake Secret, from the ephemeral keys,
    we need an additional handshake secret in KEMTLS.  We require this
@@ -410,7 +512,7 @@ static_client_shared -> HKDF.Extract = Main Secret
                       0 -> HKDF.Extract = Main Secret
                         v
 
-7.4.  Finished keys
+6.4.  Finished keys
 
    We derived the finished keys from "MS" instead of from "CHTS" and
    "SHTS".  We separate them by individual labels and the transcript.
@@ -418,11 +520,11 @@ static_client_shared -> HKDF.Extract = Main Secret
    finished_client <- HKDF.Expand(MS, "c finished", transcript_up_to_CF)
    finished_server <- HKDF.Expand(MS, "s finished", transcript_up_to_SF)
 
-8.  Protocol Mechanics
+7.  Protocol Mechanics
 
    TODO
 
-9.  (Middlebox) Compatibility Considerations
+8.  (Middlebox) Compatibility Considerations
 
    Like in TLS 1.3, after the ephemeral key is derived a
    "ChangeCipherSpec" message is sent and the messages afterwards are
@@ -434,9 +536,9 @@ static_client_shared -> HKDF.Extract = Main Secret
    public-key and ciphertext sizes are also significantly bigger than
    pre-quantum (EC)DH keyshares.  This may still cause problems.
 
-10.  Integration with Delegated Credentials
+9.  Integration with Delegated Credentials
 
-11.  Security Considerations
+10.  Security Considerations
 
    TODO:
 
@@ -449,19 +551,19 @@ static_client_shared -> HKDF.Extract = Main Secret
 
    *  consider downgrade resilience
 
-12.  IANA Considerations
+11.  IANA Considerations
 
    *  We need a new OID for each KEM to encode them in X.509
       certificates.
 
-13.  Acknowledgements
+12.  Acknowledgements
 
    This work has been supported by the European Research Council through
    Starting Grant No. 805031 (EPOQUE).
 
-14.  References
+13.  References
 
-14.1.  Normative References
+13.1.  Normative References
 
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119,
@@ -476,7 +578,7 @@ static_client_shared -> HKDF.Extract = Main Secret
               Version 1.3", RFC 8446, DOI 10.17487/RFC8446, August 2018,
               <https://datatracker.ietf.org/doc/html/rfc8446>.
 
-14.2.  Informative References
+13.2.  Informative References
 
    [KEMTLS]   Stebila, D., Schwabe, P., and T. Wiggers, "Post-Quantum
               TLS without Handshake Signatures",
