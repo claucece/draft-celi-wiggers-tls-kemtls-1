@@ -1120,10 +1120,7 @@ address div.right {
             <p id="section-toc.1-1.4.1"><a href="#section-4" class="xref">4</a>.  <a href="#name-protocol-overview" class="xref">Protocol Overview</a></p>
 <ul class="toc compact ulEmpty">
 <li class="toc compact ulEmpty" id="section-toc.1-1.4.2.1">
-                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-resumption-and-pre-shared-k" class="xref">Resumption and Pre-Shared Key (PSK)</a></p>
-</li>
-              <li class="toc compact ulEmpty" id="section-toc.1-1.4.2.2">
-                <p id="section-toc.1-1.4.2.2.1"><a href="#section-4.2" class="xref">4.2</a>.  <a href="#name-prior-knowledge-kem-tls" class="xref">Prior-knowledge KEM-TLS</a></p>
+                <p id="section-toc.1-1.4.2.1.1"><a href="#section-4.1" class="xref">4.1</a>.  <a href="#name-prior-knowledge-kem-tls" class="xref">Prior-knowledge KEM-TLS</a></p>
 </li>
             </ul>
 </li>
@@ -1369,24 +1366,62 @@ Authentication message can be subject to a client downgrade
 attack. Full downgrade resilience is only achieved when explicit
 authentication is achieved: when the Client receives the Finished
 message from the Server.<a href="#section-4-15" class="pilcrow">¶</a></p>
-<div id="resumption-and-pre-shared-key-psk">
-<section id="section-4.1">
-        <h3 id="name-resumption-and-pre-shared-k">
-<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-resumption-and-pre-shared-k" class="section-name selfRef">Resumption and Pre-Shared Key (PSK)</a>
-        </h3>
-<p id="section-4.1-1">TODO: can it be used with KEMTLS?<a href="#section-4.1-1" class="pilcrow">¶</a></p>
-</section>
-</div>
 <div id="prior-knowledge-kem-tls">
-<section id="section-4.2">
+<section id="section-4.1">
         <h3 id="name-prior-knowledge-kem-tls">
-<a href="#section-4.2" class="section-number selfRef">4.2. </a><a href="#name-prior-knowledge-kem-tls" class="section-name selfRef">Prior-knowledge KEM-TLS</a>
+<a href="#section-4.1" class="section-number selfRef">4.1. </a><a href="#name-prior-knowledge-kem-tls" class="section-name selfRef">Prior-knowledge KEM-TLS</a>
         </h3>
-<p id="section-4.2-1">Given the added number of round-trips to the TLS 1.3, KEMTLS'
-handshake can be improved by the usage of pre-distributed
-KEM authentication keys to achieve explicit authentication
-and full downgrade resilience. A party's long-term KEM
-authentication key can be cached in advance.<a href="#section-4.2-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-1">Given the added number of round-trips of KEMTLS compared to the TLS 1.3,
+the KEMTLS handshake can be improved by the usage of pre-distributed
+KEM authentication keys to achieve explicit authentication and full downgrade
+resilience as early as possible. A peer's long-term KEM authentication key can
+be cached in advance.<a href="#section-4.1-1" class="pilcrow">¶</a></p>
+<p id="section-4.1-2">Figure 2 below shows a pair of handshakes in which the first handshake
+establishes cached information and the second handshake uses it:<a href="#section-4.1-2" class="pilcrow">¶</a></p>
+<div class="artwork art-text alignLeft" id="section-4.1-3">
+<pre>
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + (kem)key_share
+     v + (kem)signature_algorithms      --------&gt;
+                                                      ServerHello  ^ Key
+                                                +  (kem)key_share  v Exch
+                                            &lt;EncryptedExtensions&gt;  ^  Server
+                                             &lt;CertificateRequest&gt;  v  Params
+     ^                                              &lt;Certificate&gt;  ^
+Auth | &lt;KEMCiphertext&gt;                                             |  Auth
+     | {Certificate}                --------&gt;                      |
+     |                              &lt;--------     {KEMCiphertext}  |
+     | {Finished}                   --------&gt;                      |
+     | [Cached Server Certificate]
+     | [Cached Server Certificate Request]
+     | [Application Data*]          --------&gt;                      |
+     v                              &lt;-------           {Finished}  |
+                                      [Cached Client Certificate]  |
+                                                                   v
+       [Application Data]           &lt;-------&gt;  [Application Data]
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + (kem)key_share
+&amp;    | + cached_info_extension
+Auth | + kem_ciphertext_extension
+     | + (kem)signature_algorithms
+     | &lt;Certificate&gt;                --------&gt;                      |
+     |                                                ServerHello  ^ Key
+     |                                          +  (kem)key_share  | Exch,
+     |                                 +  {cached_info_extension}  | Auth &amp;
+     |                                      {EncryptedExtensions}  | Server
+     |                                            {KEMCiphertext}  | Params
+     |                              &lt;--------          {Finished}  v
+     |                              &lt;-------- [Application Data*]
+     v {Finished}                   --------&gt;
+
+       [Application Data]           &lt;-------&gt;  [Application Data]
+</pre><a href="#section-4.1-3" class="pilcrow">¶</a>
+</div>
 </section>
 </div>
 </section>
