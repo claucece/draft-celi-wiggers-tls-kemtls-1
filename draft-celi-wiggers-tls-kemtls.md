@@ -227,7 +227,7 @@ Given the added number of round-trips of KEMTLS compared to the TLS 1.3,
 the KEMTLS handshake can be improved by the usage of pre-distributed
 KEM authentication keys to achieve explicit authentication and full downgrade
 resilience as early as possible. A peer's long-term KEM authentication key can
-be cached in advance.
+be cached in advance, as well.
 
 Figure 2 below shows a pair of handshakes in which the first handshake
 establishes cached information and the second handshake uses it:
@@ -275,14 +275,110 @@ Auth | + kem_ciphertext_extension
        [Application Data]           <------->  [Application Data]
 ~~~~~
 
+In some applications, such as in a VPN, the client already knows that the
+server will require mutual authentication. This means that a client can proactively
+authenticate by sending its certificate as early in the handshake as possible.
+The client's certificate have to be sent encrypted by using the shared secret
+derived from the kem_ciphertext encapsulation.
+
 # Handshake protocol
 
-TODO: add KEMCiphertext to the `HandshakeType` and forbid
-`CertificateVerify`.
+The handshake protocol is used to negotiate the security parameters
+of a connection, as in TLS 1.3. It uses the same messages, expect
+for the addition of a `KEMCiphertext` message and does not use
+the `CertificateVerify` one.
 
-# Key Exchange Messages
+~~~
+enum {
+          ...
+          encrypted_extensions(8),
+          certificate(11),
+          kem_ciphertext(tbd),
+          certificate_request(13),
+          ...
+          message_hash(254),
+          (255)
+      } HandshakeType;
 
-TODO: huge todo
+      struct {
+          HandshakeType msg_type;    /* handshake type */
+          uint24 length;             /* remaining bytes in message */
+          select (Handshake.msg_type) {
+              ...
+              case encrypted_extensions:  EncryptedExtensions;
+              case certificate_request:   CertificateRequest;
+              case certificate:           Certificate;
+              case kem_ciphertext:        KEMCiphertext;
+              ...
+          };
+      } Handshake;
+~~~
+
+Protocol messages MUST be sent in the order defined in Section 4.
+A peer which receives a handshake message in an unexpected order MUST
+abort the handshake with an "unexpected_message" alert.
+
+## Key Exchange Messages
+
+KEMTLS uses the same key exchange messages as TLS 1.3 with this
+exceptions:
+
+- Usage of a new message `KEMCiphertext`.
+- The `CertificateVerify` message is not used.
+- Two extensions can be added to the `ClientHello` message: "cached_information"
+  and "kem_ciphertext".
+- One extensions can be added to the `ServerHello` message: "cached_information".
+
+KEMTLS preserves the same cryptographic negotiation with the addition
+of more algorithms to the "supported_groups" and "signature_algorithms".
+
+### Client Hello
+
+KEMTLS uses the `ClientHello` message as described for TLS 1.3. When used
+in a pre-distributed mode, however, two extensions are mandatory: "cached_information"
+and `kem_ciphertext` for server authentication. This extensions are
+described later in the document.
+
+### Server Hello
+
+KEMTLS uses the `ServerHello` message as described for TLS 1.3. When used
+in a pre-distributed mode, however, one extensions is mandatory: "cached_information"
+for server authentication. This extension is described later in the document.
+
+### Hello Retry Request
+
+KEMTLS uses the `ServerHello` message as described for TLS 1.3. When used
+in a pre-distributed mode, however, a Hello Retry Request message
+should not be sent.
+
+### Extensions
+
+A number of KEMTLS messages contain tag-length-value encoded extensions
+structures. We are adding those extensions to the `ExtensionType` list
+from TLS 1.3.
+
+~~~
+enum {
+    ...
+    signature_algorithms_cert(50),              /* RFC 8446 */
+    key_share(51),                              /* RFC 8446 */
+    kem_ciphertext(TBD),                        /* RFC TBD */
+    cached_info(TBD),                           /* RFC TBD */
+    (65535)
+} ExtensionType;
+~~~
+
+The table below indicates the messages where a given extension may
+appear:
+
+   +--------------------------------------------------+-------------+
+   | Extension                                        |     TLS 1.3 |
+   +--------------------------------------------------+-------------+
+   | kem_ciphertext [RFCTBD]                          |          CH |
+   |                                                  |             |
+   | cached_info [RFCTBD]                             |      CH, SH |
+   |                                                  |             |
+   +--------------------------------------------------+-------------+
 
 # Key schedule
 
