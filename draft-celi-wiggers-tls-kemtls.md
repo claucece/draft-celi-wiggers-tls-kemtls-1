@@ -416,13 +416,13 @@ are added to the `SignatureScheme` list:
       ntru2048509_secp521r1(TBD),
       light_saber_secp521r1(TBD),
 
-      kyber512_ed25519(TBD),
-      ntru2048509_ed25519(TBD),
-      light_saber_ed25519(TBD),
+      kyber512_x25519(TBD),
+      ntru2048509_x25519(TBD),
+      light_saber_x25519(TBD),
 
-      kyber512_ed448(TBD),
-      ntru2048509_ed448(TBD),
-      light_saber_ed448(TBD),
+      kyber512_x448(TBD),
+      ntru2048509_x448(TBD),
+      light_saber_x448(TBD),
 
       /* Legacy algorithms */
       rsa_pkcs1_sha1(0x0201),
