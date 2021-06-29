@@ -3,8 +3,7 @@
 
 title: KEMTLS
 abbrev: KEMTLS
-docname: draft-wiggers-tls-kemtls-latest
-date:
+docname: draft-celi-wiggers-tls-kemtls-latest
 category: info
 
 ipr: trust200902
