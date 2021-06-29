@@ -2,9 +2,9 @@
 
 This is the working area for the individual Internet-Draft, "KEMTLS".
 
-* [Editor's Copy](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-wiggers-tls-kemtls.html)
-* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-wiggers-tls-kemtls)
-* [Compare Editor's Copy to Individual Draft](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-wiggers-tls-kemtls.diff)
+* [Editor's Copy](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-celi-wiggers-tls-kemtls.html)
+* [Individual Draft](https://datatracker.ietf.org/doc/html/draft-celi-wiggers-tls-kemtls)
+* [Compare Editor's Copy to Individual Draft](https://claucece.github.io/draft-celi-wiggers-tls-kemtls.md/#go.draft-celi-wiggers-tls-kemtls.diff)
 
 ## Building the Draft
 
