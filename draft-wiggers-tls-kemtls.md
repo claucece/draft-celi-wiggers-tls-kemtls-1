@@ -222,17 +222,59 @@ attack. Full downgrade resilience is only achieved when explicit
 authentication is achieved: when the Client receives the Finished
 message from the Server.
 
-## Resumption and Pre-Shared Key (PSK)
-
-TODO: can it be used with KEMTLS?
-
 ## Prior-knowledge KEM-TLS
 
-Given the added number of round-trips to the TLS 1.3, KEMTLS'
-handshake can be improved by the usage of pre-distributed
-KEM authentication keys to achieve explicit authentication
-and full downgrade resilience. A party's long-term KEM
-authentication key can be cached in advance.
+Given the added number of round-trips of KEMTLS compared to the TLS 1.3,
+the KEMTLS handshake can be improved by the usage of pre-distributed
+KEM authentication keys to achieve explicit authentication and full downgrade
+resilience as early as possible. A peer's long-term KEM authentication key can
+be cached in advance.
+
+Figure 2 below shows a pair of handshakes in which the first handshake
+establishes cached information and the second handshake uses it:
+
+~~~~~
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + (kem)key_share
+     v + (kem)signature_algorithms      -------->
+                                                      ServerHello  ^ Key
+                                                +  (kem)key_share  v Exch
+                                            <EncryptedExtensions>  ^  Server
+                                             <CertificateRequest>  v  Params
+     ^                                              <Certificate>  ^
+Auth | <KEMCiphertext>                                             |  Auth
+     | {Certificate}                -------->                      |
+     |                              <--------     {KEMCiphertext}  |
+     | {Finished}                   -------->                      |
+     | [Cached Server Certificate]
+     | [Cached Server Certificate Request]
+     | [Application Data*]          -------->                      |
+     v                              <-------           {Finished}  |
+                                      [Cached Client Certificate]  |
+                                                                   v
+       [Application Data]           <------->  [Application Data]
+
+       Client                                           Server
+
+Key  ^ ClientHello
+Exch | + (kem)key_share
+&    | + cached_info_extension
+Auth | + kem_ciphertext_extension
+     | + (kem)signature_algorithms
+     | <Certificate>                -------->                      |
+     |                                                ServerHello  ^ Key
+     |                                          +  (kem)key_share  | Exch,
+     |                                 +  {cached_info_extension}  | Auth &
+     |                                      {EncryptedExtensions}  | Server
+     |                                            {KEMCiphertext}  | Params
+     |                              <--------          {Finished}  v
+     |                              <-------- [Application Data*]
+     v {Finished}                   -------->
+
+       [Application Data]           <------->  [Application Data]
+~~~~~
 
 # Handshake protocol
 
