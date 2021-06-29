@@ -481,6 +481,40 @@ are added to the `NamedGroup` list:
 The algorithms added here correspond to the round-3 finalists of the post-quantum
 NIST competition targeting a 128 security level.
 
+#### Key Share
+
+KEMTLS uses the same mechanism as TLS 1.3 for advertising the endpoint's
+cryptographic parameters, with these changes:
+
+~~~
+  struct {
+      NamedGroup group;
+      HybridKeyExchange hybrid_key_exchanges;
+  } KeyShareEntry;
+~~~
+
+The HybridKeyExchange sent as part of the ClientHello or HelloRetryMessage
+corresponds to:
+
+~~~
+   struct {
+       opaque key_exchange_1<1..2^16-1>; ----> the classical public key
+       opaque key_exchange_2<1..2^16-1>; ----> the post-quantum public key
+   } HybridKeyExchange
+~~~
+
+The HybridKeyExchange sent as part of the ServerHello:
+
+~~~
+   struct {
+       opaque key_exchange_1<1..2^16-1>; ----> the classical public key
+       opaque key_exchange_2<1..2^16-1>; ----> the KEM ciphertext
+   } HybridKeyExchange
+~~~
+
+If a hybrid mode is not in use, only the post-quantum public key or
+ciphertext is advertised.
+
 #### Cached Information
 
 This document defines a new extension type (cached_info(TBD)), which
