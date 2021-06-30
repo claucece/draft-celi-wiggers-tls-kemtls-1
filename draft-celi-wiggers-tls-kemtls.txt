@@ -73,6 +73,7 @@ Table of Contents
        5.1.4.  Extensions
        5.1.5.  Implicit Authentication Messages
        5.1.6.  Certificate
+       5.1.7.  KEM Ciphertext
    6.  Key schedule
      6.1.  Negotiation
      6.2.  Handshake Secret
@@ -678,6 +679,51 @@ Auth | + kem_ciphertext_extension
    contain both a classical KEM public key and a post-quantum one.  In a
    non-hybrid mode, the leaf Certificate or the RawHybridPublicKey MUST
    contain a post-quantum KEM public key.
+
+5.1.7.  KEM Ciphertext
+
+   This message is used to provide implicit proof that an endpoint
+   possesses the private key(s) corresponding to its certificate by
+   sending the appropriate parameters that will be used to calculate the
+   shared secret.
+
+   The calculation of the shared secret also provides integrity for the
+   handshake up to this point.  Servers MUST send this message when
+   authenticating via a certificate.  Clients MUST send this message
+   whenever authenticating via a certificate (i.e., when the Certificate
+   message is non-empty).  When sent, this message MUST appear
+   immediately after the Certificate message and immediately prior to
+   the Finished message.
+
+   Structure of this message:
+
+     struct {
+         SignatureScheme algorithm;
+         opaque ciphertext<0..2^16-1>;
+     } KEMCiphertext;
+
+   The algorithm field specifies the authentication algorithm used.  The
+   ciphertext is the result of a Encapsulation() function.  In the
+   hybrid mode, it is a concatenation of the two return of
+   Encapsulation() functions.
+
+   If the KEMCiphertext message is sent by a server, the authentication
+   algorithm MUST be one offered in the client's "signature_algorithms"
+   extension unless no valid certificate chain can be produced without
+   unsupported algorithms.
+
+   If sent by a client, the authentication algorithm used in the
+   signature MUST be one of those present in the
+   supported_signature_algorithms field of the "signature_algorithms"
+   extension in the CertificateRequest message.
+
+   In addition, the authentication algorithm MUST be compatible with the
+   key in the sender's end-entity certificate.
+
+   The receiver of a KEMCiphertext message MUST perform the
+   Decapsulation() operation by using the sent ciphertext and the
+   private key(s) of the public key(s) advertised on the end-entity
+   certificate sent.
 
 6.  Key schedule
 
