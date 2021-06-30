@@ -688,6 +688,10 @@ The receiver of a KEMCiphertext message MUST perform the Decapsulation()
 operation by using the sent ciphertext and the private key(s) of the
 public key(s) advertised on the end-entity certificate sent.
 
+### Explicit Authentication Messages
+
+#### Finished
+
 # Key schedule
 
 ## Negotiation
