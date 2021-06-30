@@ -5,8 +5,8 @@
 tls                                                           T. Wiggers
 Internet-Draft                                        Radboud University
 Intended status: Informational                                   S. Celi
-Expires: 31 December 2021                                     Cloudflare
-                                                            29 June 2021
+Expires: 1 January 2022                                       Cloudflare
+                                                            30 June 2021
 
 
                                  KEMTLS
@@ -42,7 +42,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 31 December 2021.
+   This Internet-Draft will expire on 1 January 2022.
 
 Copyright Notice
 
@@ -71,7 +71,8 @@ Table of Contents
        5.1.2.  Server Hello
        5.1.3.  Hello Retry Request
        5.1.4.  Extensions
-       5.1.5.  Signature Algorithms
+       5.1.5.  Implicit Authentication Messages
+       5.1.6.  Certificate
    6.  Key schedule
      6.1.  Negotiation
      6.2.  Handshake Secret
@@ -423,7 +424,7 @@ Auth | + kem_ciphertext_extension
       |                                                  |             |
       +--------------------------------------------------+-------------+
 
-5.1.5.  Signature Algorithms
+5.1.4.1.  Signature Algorithms
 
    This extension works the same was as with TLS 1.3; but certain
    algorithms are added to the "SignatureScheme" list:
@@ -477,7 +478,7 @@ Auth | + kem_ciphertext_extension
    The algorithms added here correspond to the round-3 finalists of the
    post-quantum NIST competition targeting a 128 security level.
 
-5.1.5.1.  Supported Groups
+5.1.4.2.  Supported Groups
 
    This extension works the same was as with TLS 1.3; but certain
    algorithms are added to the "NamedGroup" list:
@@ -519,7 +520,7 @@ Auth | + kem_ciphertext_extension
    The algorithms added here correspond to the round-3 finalists of the
    post-quantum NIST competition targeting a 128 security level.
 
-5.1.5.2.  Key Share
+5.1.4.3.  Key Share
 
    KEMTLS uses the same mechanism as TLS 1.3 for advertising the
    endpoint's cryptographic parameters, with these changes:
@@ -547,7 +548,7 @@ Auth | + kem_ciphertext_extension
    If a hybrid mode is not in use, only the post-quantum public key or
    ciphertext is advertised.
 
-5.1.5.3.  Cached Information
+5.1.4.4.  Cached Information
 
    This document defines a new extension type (cached_info(TBD)), which
    is used in ClientHello and ServerHello messages.  The extension type
@@ -605,6 +606,78 @@ Auth | + kem_ciphertext_extension
 
    If this extension is not present, the "kem_ciphertext" extension MUST
    not be present as well.  If present, it will be ignored.
+
+5.1.5.  Implicit Authentication Messages
+
+   As discussed, KEMTLS generally uses a common set of messages for
+   implicit authentication and key confirmation: Certificate and
+   KEMCiphertext.
+
+   The computations for the Authentication messages all uniformly take
+   the following inputs:
+
+   *  The certificate and authentication key to be used.
+
+   *  A Handshake Context consisting of the set of messages to be
+      included in the transcript hash.
+
+   *  A Shared Secret Key (from the PQ KEM operations) to be used to
+      compute an authenticated handshake shared key.
+
+   *  A Handshake Context consisting of the set of messages to be
+      included in the transcript hash.
+
+   Based on these inputs, the messages then contain:
+
+   Certificate: The certificate to be used for authentication, and any
+   supporting certificates in the chain.
+
+   KEMCiphertext: The post-quantum KEM ciphertext (or a hybrid one)
+   against the certificate's public key(s).
+
+   KEMTLS follows the TLS 1.3 key schedule, which applies a sequence of
+   HKDF operations to the Shared Secret Key and the handshake context to
+   derive:
+
+   *  the client and server handshake traffic secrets "CHTS" and "SHTS"
+      which are used to encrypt subsequent flows in the handshake
+
+   *  "derived handshake secret" "dHS" which is kept as the current
+      secret state of the key schedule
+
+5.1.6.  Certificate
+
+   KEMTLS uses the same Certificate message as TLS 1.3 with these
+   changes:
+
+  enum {
+      X509(0),
+      RawHybridPublicKey(2),
+      (255)
+  } CertificateType;
+
+  struct {
+      select (certificate_type) {
+          case RawHybridPublicKey:
+            /* From RFC TBD */
+            opaque ASN1_subjectPublicKeyInfo<1..2^24-1>; ----> the classical KEM public key
+            opaque ASN1_subjectPublicKeyInfo<1..2^24-1>; ----> the post-quantum KEM public key
+
+          case X509:
+            opaque cert_data<1..2^24-1>;
+      };
+      Extension extensions<0..2^16-1>;
+  } CertificateEntry;
+
+  struct {
+      opaque certificate_request_context<0..2^8-1>;
+      CertificateEntry certificate_list<0..2^24-1>;
+  } Certificate;
+
+   In a hybrid mode, the leaf Certificate or the RawHybridPublicKey MUST
+   contain both a classical KEM public key and a post-quantum one.  In a
+   non-hybrid mode, the leaf Certificate or the RawHybridPublicKey MUST
+   contain a post-quantum KEM public key.
 
 6.  Key schedule
 
