@@ -74,6 +74,7 @@ Table of Contents
        5.1.5.  Implicit Authentication Messages
        5.1.6.  Certificate
        5.1.7.  KEM Ciphertext
+       5.1.8.  Explicit Authentication Messages
    6.  Key schedule
      6.1.  Negotiation
      6.2.  Handshake Secret
@@ -724,6 +725,10 @@ Auth | + kem_ciphertext_extension
    Decapsulation() operation by using the sent ciphertext and the
    private key(s) of the public key(s) advertised on the end-entity
    certificate sent.
+
+5.1.8.  Explicit Authentication Messages
+
+5.1.8.1.  Finished
 
 6.  Key schedule
 
