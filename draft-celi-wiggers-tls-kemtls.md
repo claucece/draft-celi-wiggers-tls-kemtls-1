@@ -381,7 +381,7 @@ appear:
    +--------------------------------------------------+-------------+
 ~~~
 
-### Signature Algorithms
+#### Signature Algorithms
 
 This extension works the same was as with TLS 1.3; but certain algorithms
 are added to the `SignatureScheme` list:
@@ -575,6 +575,73 @@ of the handshake.
 
 If this extension is not present, the `kem_ciphertext` extension MUST
 not be present as well. If present, it will be ignored.
+
+### Implicit Authentication Messages
+
+As discussed, KEMTLS generally uses a common set of messages for implicit
+authentication and key confirmation: Certificate and KEMCiphertext.
+
+The computations for the Authentication messages all uniformly take
+the following inputs:
+
+-  The certificate and authentication key to be used.
+-  A Handshake Context consisting of the set of messages to be included in the
+   transcript hash.
+-  A Shared Secret Key (from the PQ KEM operations) to be used to compute an
+   authenticated handshake shared key.
+-  A Handshake Context consisting of the set of messages to be
+   included in the transcript hash.
+
+Based on these inputs, the messages then contain:
+
+Certificate:  The certificate to be used for authentication, and any supporting
+  certificates in the chain.
+
+KEMCiphertext: The post-quantum KEM ciphertext (or a hybrid one) against the
+  certificate's public key(s).
+
+KEMTLS follows the TLS 1.3 key schedule, which applies a sequence of HKDF
+operations to the Shared Secret Key and the handshake context to derive:
+
+- the client and server handshake traffic secrets `CHTS` and `SHTS` which are
+  used to encrypt subsequent flows in the handshake
+- “derived handshake secret” `dHS` which is kept as the current secret state
+  of the key schedule
+
+### Certificate
+
+KEMTLS uses the same Certificate message as TLS 1.3 with these changes:
+
+~~~
+  enum {
+      X509(0),
+      RawHybridPublicKey(2),
+      (255)
+  } CertificateType;
+
+  struct {
+      select (certificate_type) {
+          case RawHybridPublicKey:
+            /* From RFC TBD */
+            opaque ASN1_subjectPublicKeyInfo<1..2^24-1>; ----> the classical KEM public key
+            opaque ASN1_subjectPublicKeyInfo<1..2^24-1>; ----> the post-quantum KEM public key
+
+          case X509:
+            opaque cert_data<1..2^24-1>;
+      };
+      Extension extensions<0..2^16-1>;
+  } CertificateEntry;
+
+  struct {
+      opaque certificate_request_context<0..2^8-1>;
+      CertificateEntry certificate_list<0..2^24-1>;
+  } Certificate;
+~~~
+
+In a hybrid mode, the leaf Certificate or the RawHybridPublicKey MUST
+contain both a classical KEM public key and a post-quantum one.
+In a non-hybrid mode, the leaf Certificate or the RawHybridPublicKey MUST
+contain a post-quantum KEM public key.
 
 # Key schedule
 
