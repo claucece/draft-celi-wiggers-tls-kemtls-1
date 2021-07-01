@@ -2,11 +2,17 @@
 
 
 
-tls                                                           T. Wiggers
-Internet-Draft                                        Radboud University
-Intended status: Informational                                   S. Celi
-Expires: 1 January 2022                                       Cloudflare
-                                                            30 June 2021
+tls                                                              S. Celi
+Internet-Draft                                                Cloudflare
+Intended status: Informational                                P. Schwabe
+Expires: 2 January 2022                               Radboud University
+                                                              D. Stebila
+                                                  University of Waterloo
+                                                              T. Wiggers
+                                                      Radboud University
+                                                                 C. Wood
+                                                              Cloudflare
+                                                             1 July 2021
 
 
                                  KEMTLS
@@ -42,7 +48,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 1 January 2022.
+   This Internet-Draft will expire on 2 January 2022.
 
 Copyright Notice
 
@@ -897,13 +903,31 @@ static_client_shared -> HKDF.Extract = Main Secret
 
 Authors' Addresses
 
+   Sofía Celi
+   Cloudflare
+
+   Email: cherenkov@riseup.net
+
+
+   Peter Schwabe
+   Radboud University
+
+   Email: peter@cryptojedi.org
+
+
+   Douglas Stebila
+   University of Waterloo
+
+   Email: douglas_stebila@stebila.ca
+
+
    Thom Wiggers
    Radboud University
 
    Email: thom@thomwiggers.nl
 
 
-   Sofía Celi
+   Christopher Wood
    Cloudflare
 
-   Email: cherenkov@riseup.net
+   Email: caw@heapingbits.net
