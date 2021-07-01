@@ -19,25 +19,25 @@ author:
     org: Cloudflare
     email: cherenkov@riseup.net
 
--
+ -
     ins: P. Schwabe
     name: Peter Schwabe
     org: Radboud University
     email: peter@cryptojedi.org
 
--
+ -
     ins: D. Stebila
     name: Douglas Stebila
     org: University of Waterloo
     email: douglas_stebila@stebila.ca
 
--
+ -
     ins: T. Wiggers
     name: Thom Wiggers
     org: Radboud University
     email: thom@thomwiggers.nl
 
--
+ -
     ins: C. Wood
     name: Christopher Wood
     org: Cloudflare
